@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortgage Payment Calculator | Randy West, Keller Williams New Tampa</title>
+<meta name="description" content="Free mortgage calculator for Tampa Bay home buyers. Estimate your monthly payment, including taxes, insurance, and HOA, with Realtor Randy West of Keller Williams New Tampa.">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+</style>
+</head>
+<body>
+<div id="rw-mtg-calc">
+  <style>
+    #rw-mtg-calc {
+      --kw-red: #CE011F;
+      --kw-red-dark: #A50119;
+      --kw-gray: #828282;
+      --ink: #232323;
+      --ink-soft: #5b5b5b;
+      --line: #e3e0dd;
+      --panel: #ffffff;
+      --canvas: #f6f5f3;
+      --tax-color: #2b2b2b;
+      --ins-color: #828282;
+      --hoa-color: #d9a441;
+      --pmi-color: #b3444a;
+      --pi-color: #CE011F;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--ink);
+      background: var(--canvas);
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 20px 44px;
+      box-sizing: border-box;
+    }
+    #rw-mtg-calc * { box-sizing: border-box; }
+    #rw-mtg-calc .rw-head {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    #rw-mtg-calc .rw-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 13px;
+      color: var(--kw-red);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    #rw-mtg-calc h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      line-height: 1.05;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    #rw-mtg-calc .rw-sub {
+      font-size: 15px;
+      color: var(--ink-soft);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    #rw-mtg-calc .rw-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 700px) {
+      #rw-mtg-calc .rw-grid { grid-template-columns: 1fr; }
+      #rw-mtg-calc { padding: 24px 14px 36px; }
+      #rw-mtg-calc .rw-panel,
+      #rw-mtg-calc .rw-results { padding: 18px 16px; }
+      #rw-mtg-calc .rw-results {
+        position: static;
+        top: auto;
+      }
+      #rw-mtg-calc h1 { font-size: 27px; }
+      #rw-mtg-calc .rw-monthly { font-size: 38px; }
+      #rw-mtg-calc .rw-sub { font-size: 14px; }
+      #rw-mtg-calc .rw-cta a { display: block; }
+    }
+    #rw-mtg-calc .rw-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    #rw-mtg-calc .rw-field { margin-bottom: 18px; }
+    #rw-mtg-calc .rw-field:last-child { margin-bottom: 0; }
+    #rw-mtg-calc .rw-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    #rw-mtg-calc label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.01em;
+    }
+    #rw-mtg-calc .rw-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--kw-red);
+    }
+    #rw-mtg-calc input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+    #rw-mtg-calc input[type="text"]:focus,
+    #rw-mtg-calc select:focus { outline: 2px solid var(--kw-red); outline-offset: 1px; }
+    #rw-mtg-calc input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--line);
+      margin-top: 6px;
+      padding: 12px 0;
+      background-clip: content-box;
+      touch-action: manipulation;
+    }
+    #rw-mtg-calc input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--kw-red);
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px var(--kw-red);
+      margin-top: -10px;
+    }
+    #rw-mtg-calc input[type="range"]::-moz-range-thumb {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--kw-red);
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px var(--kw-red);
+    }
+    #rw-mtg-calc select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    #rw-mtg-calc .rw-term-toggle {
+      display: flex;
+      gap: 8px;
+    }
+    #rw-mtg-calc .rw-term-btn {
+      flex: 1;
+      padding: 9px 0;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: #fff;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    #rw-mtg-calc .rw-term-btn.active {
+      background: var(--kw-red);
+      border-color: var(--kw-red);
+      color: #fff;
+    }
+    #rw-mtg-calc .rw-advanced-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--line);
+      padding: 18px 0 0;
+      margin-top: 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--kw-red);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #rw-mtg-calc .rw-advanced-toggle .rw-chevron {
+      transition: transform .2s ease;
+      font-size: 12px;
+    }
+    #rw-mtg-calc .rw-advanced-toggle.open .rw-chevron { transform: rotate(180deg); }
+    #rw-mtg-calc .rw-advanced-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .25s ease;
+    }
+    #rw-mtg-calc .rw-advanced-body.open { max-height: 600px; margin-top: 16px; }
+    #rw-mtg-calc .rw-pmi-note {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    /* Results panel */
+    #rw-mtg-calc .rw-results {
+      background: var(--ink);
+      color: #fff;
+      border-radius: 10px;
+      padding: 26px 24px;
+      position: sticky;
+      top: 20px;
+    }
+    #rw-mtg-calc .rw-results-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: #c9c9c9;
+      margin-bottom: 6px;
+    }
+    #rw-mtg-calc .rw-monthly {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 46px;
+      line-height: 1;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    #rw-mtg-calc .rw-monthly-sub {
+      font-size: 13px;
+      color: #b9b9b9;
+      margin-bottom: 22px;
+    }
+    #rw-mtg-calc .rw-bar {
+      display: flex;
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      background: #3a3a3a;
+    }
+    #rw-mtg-calc .rw-bar span { height: 100%; }
+    #rw-mtg-calc .rw-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+    #rw-mtg-calc .rw-b-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13.5px;
+    }
+    #rw-mtg-calc .rw-b-left { display: flex; align-items: center; gap: 8px; color: #d8d8d8; }
+    #rw-mtg-calc .rw-dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+    #rw-mtg-calc .rw-b-right { font-weight: 600; color: #fff; }
+    #rw-mtg-calc .rw-divider { border-top: 1px solid #3a3a3a; margin: 18px 0; }
+    #rw-mtg-calc .rw-stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #c9c9c9;
+      margin-bottom: 8px;
+    }
+    #rw-mtg-calc .rw-stat-row b { color: #fff; font-weight: 600; }
+
+    #rw-mtg-calc .rw-cta {
+      margin-top: 22px;
+      background: var(--kw-red);
+      border-radius: 8px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    #rw-mtg-calc .rw-cta p {
+      margin: 0 0 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      color: #fff;
+    }
+    #rw-mtg-calc .rw-cta a {
+      display: inline-block;
+      background: #fff;
+      color: var(--kw-red-dark);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    #rw-mtg-calc .rw-disclaimer {
+      font-size: 11px;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <div class="rw-head">
+    <div class="rw-eyebrow">Tampa Bay Home Loan Estimate</div>
+    <h1>Mortgage Payment Calculator</h1>
+    <p class="rw-sub">Estimate your monthly payment, including taxes, insurance and HOA, for homes anywhere in Hillsborough, Pinellas, Pasco or Manatee County.</p>
+  </div>
+
+  <div class="rw-grid">
+    <!-- INPUT PANEL -->
+    <div class="rw-panel">
+      <div class="rw-field">
+        <div class="rw-row"><label for="rwHomePrice">Home Price</label></div>
+        <input type="text" id="rwHomePrice" inputmode="numeric" value="425,000">
+      </div>
+
+      <div class="rw-field">
+        <div class="rw-row">
+          <label for="rwDownPct">Down Payment</label>
+          <span class="rw-val"><span id="rwDownDollarLabel">$85,000</span> (<span id="rwDownPctLabel">20</span>%)</span>
+        </div>
+        <input type="range" id="rwDownPct" min="0" max="50" step="1" value="20">
+      </div>
+
+      <div class="rw-field">
+        <div class="rw-row">
+          <label for="rwRate">Interest Rate</label>
+          <span class="rw-val"><span id="rwRateLabel">6.75</span>%</span>
+        </div>
+        <input type="range" id="rwRate" min="3" max="10" step="0.05" value="6.75">
+      </div>
+
+      <div class="rw-field">
+        <label>Loan Term</label>
+        <div class="rw-term-toggle">
+          <div class="rw-term-btn" data-term="15">15 yr</div>
+          <div class="rw-term-btn" data-term="20">20 yr</div>
+          <div class="rw-term-btn active" data-term="30">30 yr</div>
+        </div>
+      </div>
+
+      <button type="button" class="rw-advanced-toggle" id="rwAdvToggle">
+        <span>Add property tax, insurance &amp; HOA</span>
+        <span class="rw-chevron">&#9660;</span>
+      </button>
+
+      <div class="rw-advanced-body" id="rwAdvBody">
+        <div class="rw-field">
+          <div class="rw-row">
+            <label for="rwTax">Annual Property Tax</label>
+          </div>
+          <input type="text" id="rwTax" inputmode="numeric" value="0">
+        </div>
+        <div class="rw-field">
+          <div class="rw-row">
+            <label for="rwIns">Annual Homeowners Insurance</label>
+          </div>
+          <input type="text" id="rwIns" inputmode="numeric" value="0">
+        </div>
+        <div class="rw-field">
+          <div class="rw-row">
+            <label for="rwHoa">Monthly HOA / CDD Fee</label>
+          </div>
+          <input type="text" id="rwHoa" inputmode="numeric" value="0">
+        </div>
+        <div class="rw-field">
+          <div class="rw-row">
+            <label for="rwPmi">PMI Rate (if down payment &lt; 20%)</label>
+            <span class="rw-val"><span id="rwPmiLabel">0.60</span>%</span>
+          </div>
+          <input type="range" id="rwPmi" min="0.1" max="2" step="0.05" value="0.6">
+          <div class="rw-pmi-note" id="rwPmiNote">Down payment is 20%+, so PMI isn't applied.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div class="rw-results">
+      <div class="rw-results-label">Estimated Monthly Payment</div>
+      <div class="rw-monthly" id="rwMonthlyTotal">$2,206</div>
+      <div class="rw-monthly-sub">Principal, interest, taxes &amp; insurance</div>
+
+      <div class="rw-bar" id="rwBar"></div>
+
+      <div class="rw-breakdown" id="rwBreakdown"></div>
+
+      <div class="rw-divider"></div>
+
+      <div class="rw-stat-row"><span>Loan amount</span><b id="rwLoanAmt">$340,000</b></div>
+      <div class="rw-stat-row"><span>Total interest paid</span><b id="rwTotalInterest">$443,780</b></div>
+      <div class="rw-stat-row"><span>Total paid over loan term</span><b id="rwTotalPaid">$783,780</b></div>
+
+      <div class="rw-cta">
+        <p>Want the real numbers for a specific home, and a lender referral to lock a rate? I'll walk you through it.</p>
+        <a href="mailto:rwest@tampabayrealestate.pro?subject=Mortgage%20Calculator%20-%20Let's%20Talk%20Numbers">Talk to Randy West</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="rw-disclaimer">This calculator provides an estimate for planning purposes only and is not a loan offer or pre-approval. Actual rates, taxes, insurance costs and PMI vary by lender, property and borrower. Consult a licensed mortgage lender for exact figures.</p>
+</div>
+
+<script>
+(function () {
+  var attempts = 0;
+  var maxAttempts = 100; // retry for up to 10 seconds
+
+  function boot() {
+    attempts++;
+    // Some page builders duplicate blocks (e.g. per responsive breakpoint)
+    // or inject Custom HTML content after the page has already loaded.
+    // Grab every copy that exists right now, and wire up all of them so
+    // whichever one is actually visible on screen works correctly.
+    var roots = document.querySelectorAll('#rw-mtg-calc');
+
+    if (!roots.length) {
+      if (attempts < maxAttempts) {
+        setTimeout(boot, 100);
+      }
+      return;
+    }
+
+    roots.forEach(function (root) {
+      // Avoid wiring the same element up twice if boot() ever runs again.
+      if (root.getAttribute('data-rw-initialized') === 'true') return;
+      root.setAttribute('data-rw-initialized', 'true');
+      initCalculator(root);
+    });
+
+    // Keep watching briefly in case more copies get inserted later
+    // (e.g. a mobile version injected after a resize/breakpoint change).
+    if (attempts < maxAttempts) {
+      setTimeout(boot, 500);
+    }
+  }
+
+  function initCalculator(root) {
+  var $ = function (id) { return root.querySelector('#' + id); };
+
+  var homePriceEl = $('rwHomePrice');
+  var downPctEl = $('rwDownPct');
+  var downDollarLabel = $('rwDownDollarLabel');
+  var downPctLabel = $('rwDownPctLabel');
+  var rateEl = $('rwRate');
+  var rateLabel = $('rwRateLabel');
+  var termBtns = root.querySelectorAll('.rw-term-btn');
+  var taxEl = $('rwTax');
+  var insEl = $('rwIns');
+  var hoaEl = $('rwHoa');
+  var pmiEl = $('rwPmi');
+  var pmiLabel = $('rwPmiLabel');
+  var pmiNote = $('rwPmiNote');
+  var advToggle = $('rwAdvToggle');
+  var advBody = $('rwAdvBody');
+
+  var monthlyTotalEl = $('rwMonthlyTotal');
+  var barEl = $('rwBar');
+  var breakdownEl = $('rwBreakdown');
+  var loanAmtEl = $('rwLoanAmt');
+  var totalInterestEl = $('rwTotalInterest');
+  var totalPaidEl = $('rwTotalPaid');
+
+  var termYears = 30;
+
+  function parseNum(el) {
+    var v = parseFloat((el.value || '0').replace(/[^0-9.]/g, ''));
+    return isNaN(v) ? 0 : v;
+  }
+  function fmtMoney(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+  function fmtInput(el) {
+    var v = parseNum(el);
+    el.value = Math.round(v).toLocaleString('en-US');
+  }
+
+  advToggle.addEventListener('click', function () {
+    var isOpen = advBody.classList.toggle('open');
+    advToggle.classList.toggle('open', isOpen);
+  });
+
+  termBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      termBtns.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      termYears = parseInt(btn.getAttribute('data-term'), 10);
+      calculate();
+    });
+  });
+
+  [homePriceEl, taxEl, insEl, hoaEl].forEach(function (el) {
+    el.addEventListener('blur', function () { fmtInput(el); calculate(); });
+    el.addEventListener('input', calculate);
+  });
+
+  [downPctEl, rateEl, pmiEl].forEach(function (el) {
+    el.addEventListener('input', calculate);
+  });
+
+  function calculate() {
+    var homePrice = parseNum(homePriceEl);
+    var downPct = parseFloat(downPctEl.value);
+    var rate = parseFloat(rateEl.value);
+    var annualTax = parseNum(taxEl);
+    var annualIns = parseNum(insEl);
+    var monthlyHoa = parseNum(hoaEl);
+    var pmiRate = parseFloat(pmiEl.value);
+
+    var downDollar = homePrice * (downPct / 100);
+    var loanAmount = Math.max(homePrice - downDollar, 0);
+
+    downDollarLabel.textContent = fmtMoney(downDollar);
+    downPctLabel.textContent = downPct;
+    rateLabel.textContent = rate.toFixed(2);
+    pmiLabel.textContent = pmiRate.toFixed(2);
+
+    var pmiApplies = downPct < 20 && loanAmount > 0;
+    pmiNote.textContent = pmiApplies
+      ? 'PMI applies because down payment is under 20%.'
+      : "Down payment is 20%+, so PMI isn't applied.";
+
+    var monthlyRate = (rate / 100) / 12;
+    var numPayments = termYears * 12;
+    var monthlyPI = 0;
+    if (loanAmount > 0 && monthlyRate > 0) {
+      monthlyPI = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+                  (Math.pow(1 + monthlyRate, numPayments) - 1);
+    } else if (loanAmount > 0) {
+      monthlyPI = loanAmount / numPayments;
+    }
+
+    var monthlyTax = annualTax / 12;
+    var monthlyIns = annualIns / 12;
+    var monthlyPmi = pmiApplies ? (loanAmount * (pmiRate / 100)) / 12 : 0;
+
+    var totalMonthly = monthlyPI + monthlyTax + monthlyIns + monthlyHoa + monthlyPmi;
+    var totalPaidOverTerm = (monthlyPI * numPayments) + downDollar;
+    var totalInterest = (monthlyPI * numPayments) - loanAmount;
+
+    monthlyTotalEl.textContent = fmtMoney(totalMonthly);
+    loanAmtEl.textContent = fmtMoney(loanAmount);
+    totalInterestEl.textContent = fmtMoney(Math.max(totalInterest, 0));
+    totalPaidEl.textContent = fmtMoney(totalPaidOverTerm);
+
+    // Build breakdown bar + legend
+    var segments = [
+      { label: 'Principal & interest', value: monthlyPI, color: 'var(--pi-color)' },
+      { label: 'Property tax', value: monthlyTax, color: 'var(--tax-color)' },
+      { label: 'Homeowners insurance', value: monthlyIns, color: 'var(--ins-color)' },
+      { label: 'HOA / CDD', value: monthlyHoa, color: 'var(--hoa-color)' },
+      { label: 'PMI', value: monthlyPmi, color: 'var(--pmi-color)' }
+    ].filter(function (s) { return s.value > 0.5; });
+
+    barEl.innerHTML = '';
+    breakdownEl.innerHTML = '';
+    segments.forEach(function (seg) {
+      var pct = totalMonthly > 0 ? (seg.value / totalMonthly) * 100 : 0;
+      var span = document.createElement('span');
+      span.style.width = pct + '%';
+      span.style.background = seg.color;
+      barEl.appendChild(span);
+
+      var row = document.createElement('div');
+      row.className = 'rw-b-row';
+      row.innerHTML =
+        '<span class="rw-b-left"><span class="rw-dot" style="background:' + seg.color + '"></span>' + seg.label + '</span>' +
+        '<span class="rw-b-right">' + fmtMoney(seg.value) + '/mo</span>';
+      breakdownEl.appendChild(row);
+    });
+  }
+
+  calculate();
+  } // end initCalculator
+
+  boot();
+})();
+</script>
+</body>
+</html>
